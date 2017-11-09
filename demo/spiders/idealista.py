@@ -1,4 +1,5 @@
 import copy
+import logging
 
 from datetime import datetime
 
@@ -19,10 +20,6 @@ class IdealistaSpider(Spider):
     default_country = 'Spain'
     default_city = 'Madrid'
     default_type = 'Alquiler'
-
-    # start_urls = [
-    #     'https://www.idealista.com/alquiler-viviendas/madrid/{neighborhood}/'
-    # ]
 
     def __init__(self, neighborhoods=None, *args, **kwargs):
         super(IdealistaSpider, self).__init__(*args, **kwargs)
@@ -65,7 +62,12 @@ class IdealistaSpider(Spider):
         for flat in flats:
             item = copy.deepcopy(basic_item)
 
-            item['id'] = flat.xpath('div//@data-adid').extract()[0]
+            if not flat.xpath('div//@id'):
+                item['id'] = flat.xpath('div//@data-adid').extract()[0]
+
+            else:
+                logging.debug('Find banner in overview. Ignoring...')
+                continue
 
             info_container = flat.css('.item-info-container')
 
@@ -80,11 +82,11 @@ class IdealistaSpider(Spider):
                 meta={
                     'item': item
                 },
-                callback=self.detail
+                callback=IdealistaSpider.detail
             )
-            return
 
-    def detail(self, response):
+    @staticmethod
+    def detail(response):
         sel = Selector(response)
 
         item = copy.deepcopy(response.meta.get('item'))
@@ -112,8 +114,12 @@ class IdealistaSpider(Spider):
         details = main_content.css('#details')
         item['description'] = details.xpath('div')[0].xpath('div/div/text()').extract()[0]
         item['basic_info'] = details.xpath('div')[2].xpath('ul').extract()[0]
-        item['building_info'] = details.xpath('div')[3].xpath('ul').extract()[0]
-        item['equipment_info'] = details.xpath('div')[4].xpath('ul').extract()[0]
+        item['building_info'] = details.xpath('div')[3].xpath('ul').extract()[0] \
+            if len(details.xpath('div')) > 3 \
+            else None
+        item['equipment_info'] = details.xpath('div')[4].xpath('ul').extract()[0] \
+            if len(details.xpath('div')) > 4 \
+            else None
 
         yield item
 
