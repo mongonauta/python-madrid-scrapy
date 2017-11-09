@@ -85,6 +85,18 @@ class IdealistaSpider(Spider):
                 callback=IdealistaSpider.detail
             )
 
+        # PAGINATION
+        next_button = sel.css('.next').xpath('a/@href').extract()
+        if next_button:
+            yield Request(
+                url='{base_url}{next_page}'.format(
+                    base_url=self.base_url,
+                    next_page=next_button[0]
+                ),
+                meta=meta,
+                callback=self.overview
+            )
+
     @staticmethod
     def detail(response):
         sel = Selector(response)
@@ -101,8 +113,14 @@ class IdealistaSpider(Spider):
         item['currency'] = price_info.xpath('text()').extract()[0]
 
         item['square_meters'] = int(flat_info.xpath('span')[1].xpath('span//text()').extract()[0])
-        item['rooms'] = flat_info.xpath('span')[2].xpath('span//text()').extract()[0]
-        item['floor'] = flat_info.xpath('span')[3].xpath('span//text()').extract()[0]
+
+        item['rooms'] = flat_info.xpath('span')[2].xpath('span//text()').extract()[0] \
+            if flat_info.xpath('span')[2].xpath('span//text()').extract() \
+            else 0
+
+        item['floor'] = flat_info.xpath('span')[3].xpath('span//text()').extract()[0] \
+            if flat_info.xpath('span')[3].xpath('span//text()').extract() \
+            else -1
 
         main_content = sel.css('#main-content')
 
