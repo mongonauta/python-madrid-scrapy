@@ -19,7 +19,7 @@ class FlatItem(Item):
     timestamp = Field(type="str")
 
     price_text = Field(type="str")
-    currency = Field(type="str")
+    currency_text = Field(type="str")
 
     rooms = Field(type="int")
     square_meters = Field(type="int")
@@ -33,4 +33,6 @@ class FlatItem(Item):
 
     # CALCULATED INFO
     country_code = Field(type="str")
+    currency_value = Field(type="str")
     price_value = Field(type="int")
+    price_value_usd = Field(type="float")

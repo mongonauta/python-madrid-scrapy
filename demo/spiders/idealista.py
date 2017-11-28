@@ -14,12 +14,16 @@ class IdealistaSpider(Spider):
     name = 'idealista'
     base_url = 'https://www.idealista.com'
 
+    rotate_user_agent = True
+
     neighborhoods = None
     rent_neighborhood_url_template = 'https://www.idealista.com/{type}-viviendas/{city}/{neighborhood}/'
 
     default_country = 'Spain'
     default_city = 'Madrid'
     default_type = 'Alquiler'
+
+    cache_info = None
 
     def __init__(self, neighborhoods=None, *args, **kwargs):
         super(IdealistaSpider, self).__init__(*args, **kwargs)
@@ -110,7 +114,7 @@ class IdealistaSpider(Spider):
         price_info = flat_info.xpath('span')[0]
 
         item['price_text'] = price_info.xpath('span//text()').extract()[0]
-        item['currency'] = price_info.xpath('text()').extract()[0]
+        item['currency_text'] = price_info.xpath('text()').extract()[0]
 
         item['square_meters'] = int(flat_info.xpath('span')[1].xpath('span//text()').extract()[0])
 
