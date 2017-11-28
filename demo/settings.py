@@ -17,13 +17,20 @@ CONCURRENT_REQUESTS = 1
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:27.0) Gecko/20100101 Firefox/27.0"
 
-ITEM_PIPELINES = {}
-
-EXTENSIONS = {}
+EXTENSIONS = {
+    'demo.custom_extensions.statistics.StatsExtension': 600
+}
 
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.cookies.CookiesMiddleware': 300,
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': 301
+    'demo.custom_middlewares.useragent.RotateUserAgentMiddleware': 400,
+    'demo.custom_middlewares.customheader.AddCustomHeaderMiddleware': 410
+}
+
+ITEM_PIPELINES = {
+    'demo.custom_pipelines.clean.CleanItems': 100,
+    'demo.custom_pipelines.prices.AddUSDToItems': 200,
+    'demo.custom_pipelines.stats.AddItemStats': 300
 }
 
 
